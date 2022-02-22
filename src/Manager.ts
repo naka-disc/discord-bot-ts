@@ -1,12 +1,19 @@
-import { Client, Intents, Message, MessageEmbed } from 'discord.js';
+import {
+  Client,
+  Intents,
+  Message,
+  MessageEmbed,
+  TextChannel,
+  VoiceState,
+} from "discord.js";
+import { Envs } from "./index";
 
 /**
  * Discord Clientを管理するクラス
  * このクラスを生成して、runすればBotが起動
  */
 export default class Manager {
-
-  private token: string;
+  private envs: Envs;
 
   private client: Client;
 
@@ -14,24 +21,27 @@ export default class Manager {
    * コンストラクタ
    * @param token Botトークン
    */
-  constructor(token: string) {
+  constructor(envs: Envs) {
     // Botトークン ここで管理
-    this.token = token;
+    this.envs = envs;
 
     // Botクライアント生成 ここで管理
     this.client = new Client({
-      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MEMBERS,
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.GUILD_VOICE_STATES,
+      ],
     });
-
-    this.client.on("messageCreate", this.sendMessage.bind(this));
   }
 
   /**
    * メッセージ送信
    * @param msg 受信メッセージ
-   * @returns 
+   * @returns
    */
-  async sendMessage(msg: Message): Promise<void> {
+  private async _sendMessage(msg: Message): Promise<void> {
     // 送信者がBotの場合は反応しない
     if (msg.author.bot) {
       return;
@@ -44,7 +54,6 @@ export default class Manager {
     } else {
       // msg.channel.send('Other');
     }
-
   }
 
   /**
@@ -54,23 +63,71 @@ export default class Manager {
   createEmbed(): MessageEmbed {
     // TODO: Sample実装
     const exampleEmbed = new MessageEmbed()
-      .setColor('#0099ff')
-      .setTitle('Some title')
-      .setURL('https://discord.js.org/')
-      .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
-      .setDescription('Some description here')
-      .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+      .setColor("#0099ff")
+      .setTitle("Some title")
+      .setURL("https://discord.js.org/")
+      .setAuthor({
+        name: "Some name",
+        iconURL: "https://i.imgur.com/AfFp7pu.png",
+        url: "https://discord.js.org",
+      })
+      .setDescription("Some description here")
+      .setThumbnail("https://i.imgur.com/AfFp7pu.png")
       .addFields(
-        { name: 'Regular field title', value: 'Some value here' },
-        { name: '\u200B', value: '\u200B' },
-        { name: 'Inline field title', value: 'Some value here', inline: true },
-        { name: 'Inline field title', value: 'Some value here', inline: true },
+        { name: "Regular field title", value: "Some value here" },
+        { name: "\u200B", value: "\u200B" },
+        { name: "Inline field title", value: "Some value here", inline: true },
+        { name: "Inline field title", value: "Some value here", inline: true }
       )
-      .addField('Inline field title', 'Some value here', true)
-      .setImage('https://i.imgur.com/AfFp7pu.png')
+      .addField("Inline field title", "Some value here", true)
+      .setImage("https://i.imgur.com/AfFp7pu.png")
       .setTimestamp()
-      .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+      .setFooter({
+        text: "Some footer text here",
+        iconURL: "https://i.imgur.com/AfFp7pu.png",
+      });
     return exampleEmbed;
+  }
+
+  /**
+   * voiceStateUpdate Event
+   */
+  private async _voiceStateUpdate(
+    oldState: VoiceState,
+    newState: VoiceState
+  ): Promise<void> {
+    const isCheckChannel = newState.channelId === this.envs.CHECK_CH_ID;
+    const isChannelDiff = oldState.channelId !== newState.channelId;
+    const isJoin = oldState.channelId === null;
+    const isLeave = newState.channelId === null;
+    const postChannel = this.client.channels.cache.get(this.envs.POST_CH_ID);
+
+    // tmp
+    function sendText() {
+      // https://stackoverflow.com/questions/52258064/discord-js-sending-a-message-to-a-specific-channel
+      if (postChannel?.isText) {
+        if (isJoin) {
+          (postChannel as TextChannel).send(
+            `${newState.member?.displayName}さんが${newState.channel?.name}に参加しました。`
+          );
+        } else {
+          (postChannel as TextChannel).send(
+            `${oldState.member?.displayName}さんが${oldState.channel?.name}を退出しました。`
+          );
+        }
+      }
+    }
+
+    if (newState.member?.user.bot) return;
+    if (!isCheckChannel && !isChannelDiff) return;
+
+    if (isJoin) {
+      // do something
+      sendText();
+    } else if (isLeave) {
+      // do something
+      sendText();
+    }
   }
 
   /**
@@ -78,7 +135,11 @@ export default class Manager {
    * Botの起動用処理
    */
   run() {
-    this.client.login(this.token);
+    this.client.login(this.envs.BOT_TOKEN);
+    this.client.on("ready", () => {
+      console.log(`${this.client.user?.tag} でログインしています。`);
+    });
+    this.client.on("voiceStateUpdate", this._voiceStateUpdate.bind(this));
+    this.client.on("messageCreate", this._sendMessage.bind(this));
   }
-
 }
