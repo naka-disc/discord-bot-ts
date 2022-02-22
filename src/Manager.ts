@@ -1,4 +1,5 @@
 import { Client, Intents, Message, TextChannel, VoiceState } from "discord.js";
+import { Envs } from "./index";
 
 /**
  * Discord Clientを管理するクラス

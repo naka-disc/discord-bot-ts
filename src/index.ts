@@ -4,6 +4,12 @@ import Manager from "./Manager";
 
 dotenv.config();
 
+export interface Envs {
+  CHECK_CH_ID: string;
+  POST_CH_ID: string;
+  BOT_TOKEN: string;
+}
+
 // Check enviroment variables
 const CHECK_CH_ID = process.env.DISCORD_VC_CHECK_TARGET_CH_ID;
 const POST_CH_ID = process.env.DISCORD_VC_CHECK_POST_CH_ID;
