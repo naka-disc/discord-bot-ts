@@ -1,12 +1,11 @@
-import { Client, Intents, Message } from 'discord.js';
+import { Client, Intents, Message, VoiceState } from "discord.js";
 
 /**
  * Discord Clientを管理するクラス
  * このクラスを生成して、runすればBotが起動
  */
 export default class Manager {
-
-  private token: string;
+  private envs: Envs;
 
   private client: Client;
 
@@ -14,13 +13,17 @@ export default class Manager {
    * コンストラクタ
    * @param token Botトークン
    */
-  constructor(token: string) {
+  constructor(envs: Envs) {
     // Botトークン ここで管理
-    this.token = token;
+    this.envs = envs;
 
     // Botクライアント生成 ここで管理
     this.client = new Client({
-      intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_MEMBERS,
+        Intents.FLAGS.GUILD_MESSAGES,
+      ],
     });
 
     this.client.on("messageCreate", this.sendMessage);
@@ -29,7 +32,7 @@ export default class Manager {
   /**
    * メッセージ送信
    * @param msg 受信メッセージ
-   * @returns 
+   * @returns
    */
   async sendMessage(msg: Message): Promise<void> {
     // 送信者がBotの場合は反応しない
@@ -37,7 +40,7 @@ export default class Manager {
       return;
     }
 
-    msg.channel.send('Pong!');
+    msg.channel.send("Pong!");
   }
 
   /**
@@ -45,7 +48,6 @@ export default class Manager {
    * Botの起動用処理
    */
   run() {
-    this.client.login(this.token);
+    this.client.login(this.envs.BOT_TOKEN);
   }
-
 }
