@@ -1,18 +1,9 @@
-import { Client, Intents, Message } from 'discord.js'
+import Manager from "./Manager";
 
-const client = new Client({
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]
-})
+// Botトークン
+// TODO: envとかから取得
+const DISCORD_VC_CHECK_BOT_TOKEN = "xxxx";
 
-client.on('ready', () => {
-  console.log(`${client.user?.tag} でログインしています。`)
-})
-
-client.on('messageCreate', async (msg: Message) => {
-  if (msg.content === '!ping') {
-    msg.channel.send('Pong!')
-  }
-})
-
-const DISCORD_VC_CHECK_BOT_TOKEN = "xxx"
-client.login(DISCORD_VC_CHECK_BOT_TOKEN)
+// マネージャクラスを生成し、実行することでBotが作動
+const manager = new Manager(DISCORD_VC_CHECK_BOT_TOKEN);
+manager.run();
