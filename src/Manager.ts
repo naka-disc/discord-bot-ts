@@ -27,6 +27,7 @@ export default class Manager {
     });
 
     this.client.on("messageCreate", this.sendMessage);
+    this.client.on("voiceStateUpdate", this.voiceStateUpdate);
   }
 
   /**
@@ -41,6 +42,25 @@ export default class Manager {
     }
 
     msg.channel.send("Pong!");
+  }
+
+  async voiceStateUpdate(
+    oldState: VoiceState,
+    newState: VoiceState
+  ): Promise<void> {
+    const isCheckChannel = newState.channelId === this.envs.CHECK_CH_ID;
+    const isChannelDiff = oldState.channelId !== newState.channelId;
+    const isJoin = newState.channelId !== null;
+    const isLeave = oldState.channelId !== null;
+
+    if (newState.member?.user.bot) return;
+    if (!isCheckChannel && !isChannelDiff) return;
+
+    if (isJoin) {
+      // do something
+    } else if (isLeave) {
+      // do something
+    }
   }
 
   /**
