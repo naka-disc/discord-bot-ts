@@ -27,9 +27,6 @@ export default class Manager {
         Intents.FLAGS.GUILD_VOICE_STATES,
       ],
     });
-
-    this.client.on("messageCreate", this._sendMessage);
-    this.client.on("voiceStateUpdate", this._voiceStateUpdate);
   }
 
   /**
@@ -71,5 +68,10 @@ export default class Manager {
    */
   run() {
     this.client.login(this.envs.BOT_TOKEN);
+    this.client.on("ready", () => {
+      console.log(`${this.client.user?.tag} でログインしています。`);
+    });
+    this.client.on("voiceStateUpdate", this._voiceStateUpdate.bind(this));
+    this.client.on("messageCreate", this._sendMessage.bind(this));
   }
 }
