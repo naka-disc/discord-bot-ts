@@ -51,14 +51,33 @@ export default class Manager {
     const isChannelDiff = oldState.channelId !== newState.channelId;
     const isJoin = oldState.channelId === null;
     const isLeave = newState.channelId === null;
+    const postChannel = this.client.channels.cache.get(this.envs.POST_CH_ID);
+
+    // tmp
+    function sendText() {
+      // https://stackoverflow.com/questions/52258064/discord-js-sending-a-message-to-a-specific-channel
+      if (postChannel?.isText) {
+        if (isJoin) {
+          (postChannel as TextChannel).send(
+            `${newState.member?.displayName}さんが${newState.channel?.name}に参加しました。`
+          );
+        } else {
+          (postChannel as TextChannel).send(
+            `${oldState.member?.displayName}さんが${oldState.channel?.name}を退出しました。`
+          );
+        }
+      }
+    }
 
     if (newState.member?.user.bot) return;
     if (!isCheckChannel && !isChannelDiff) return;
 
     if (isJoin) {
       // do something
+      sendText();
     } else if (isLeave) {
       // do something
+      sendText();
     }
   }
 
