@@ -1,4 +1,4 @@
-import { Client, Intents, Message } from 'discord.js';
+import { Client, Intents, Message, MessageEmbed } from 'discord.js';
 
 /**
  * Discord Clientを管理するクラス
@@ -23,7 +23,7 @@ export default class Manager {
       intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]
     });
 
-    this.client.on("messageCreate", this.sendMessage);
+    this.client.on("messageCreate", this.sendMessage.bind(this));
   }
 
   /**
@@ -37,7 +37,40 @@ export default class Manager {
       return;
     }
 
-    msg.channel.send('Pong!');
+    // 入力値に応じて分岐
+    if (msg.content === "!embed") {
+      const ret = this.createEmbed();
+      msg.channel.send({ embeds: [ret] });
+    } else {
+      // msg.channel.send('Other');
+    }
+
+  }
+
+  /**
+   * Embed生成
+   * @returns MessageEmbed
+   */
+  createEmbed(): MessageEmbed {
+    // TODO: Sample実装
+    const exampleEmbed = new MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle('Some title')
+      .setURL('https://discord.js.org/')
+      .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+      .setDescription('Some description here')
+      .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+      .addFields(
+        { name: 'Regular field title', value: 'Some value here' },
+        { name: '\u200B', value: '\u200B' },
+        { name: 'Inline field title', value: 'Some value here', inline: true },
+        { name: 'Inline field title', value: 'Some value here', inline: true },
+      )
+      .addField('Inline field title', 'Some value here', true)
+      .setImage('https://i.imgur.com/AfFp7pu.png')
+      .setTimestamp()
+      .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' });
+    return exampleEmbed;
   }
 
   /**
