@@ -26,8 +26,8 @@ export default class Manager {
       ],
     });
 
-    this.client.on("messageCreate", this.sendMessage);
-    this.client.on("voiceStateUpdate", this.voiceStateUpdate);
+    this.client.on("messageCreate", this._sendMessage);
+    this.client.on("voiceStateUpdate", this._voiceStateUpdate);
   }
 
   /**
@@ -35,7 +35,7 @@ export default class Manager {
    * @param msg 受信メッセージ
    * @returns
    */
-  async sendMessage(msg: Message): Promise<void> {
+  private async _sendMessage(msg: Message): Promise<void> {
     // 送信者がBotの場合は反応しない
     if (msg.author.bot) {
       return;
@@ -44,7 +44,7 @@ export default class Manager {
     msg.channel.send("Pong!");
   }
 
-  async voiceStateUpdate(
+  private async _voiceStateUpdate(
     oldState: VoiceState,
     newState: VoiceState
   ): Promise<void> {
