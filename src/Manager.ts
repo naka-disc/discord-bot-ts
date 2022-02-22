@@ -1,4 +1,4 @@
-import { Client, Intents, Message, VoiceState } from "discord.js";
+import { Client, Intents, Message, TextChannel, VoiceState } from "discord.js";
 
 /**
  * Discord Clientを管理するクラス
@@ -50,8 +50,8 @@ export default class Manager {
   ): Promise<void> {
     const isCheckChannel = newState.channelId === this.envs.CHECK_CH_ID;
     const isChannelDiff = oldState.channelId !== newState.channelId;
-    const isJoin = newState.channelId !== null;
-    const isLeave = oldState.channelId !== null;
+    const isJoin = oldState.channelId === null;
+    const isLeave = newState.channelId === null;
 
     if (newState.member?.user.bot) return;
     if (!isCheckChannel && !isChannelDiff) return;
