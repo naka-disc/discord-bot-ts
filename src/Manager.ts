@@ -89,6 +89,9 @@ export default class Manager {
     return exampleEmbed;
   }
 
+  /**
+   * voiceStateUpdate Event
+   */
   private async _voiceStateUpdate(
     oldState: VoiceState,
     newState: VoiceState
