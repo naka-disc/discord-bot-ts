@@ -101,33 +101,26 @@ export default class Manager {
     const isJoin = oldState.channelId === null;
     const isLeave = newState.channelId === null;
     const postChannel = this.client.channels.cache.get(this.envs.POST_CH_ID);
+    let msg: string = "";
 
-    // tmp
-    function sendText() {
+    // TODO: replace to an embed message
+    function sendText(msg: string) {
       // https://stackoverflow.com/questions/52258064/discord-js-sending-a-message-to-a-specific-channel
-      if (postChannel?.isText) {
-        if (isJoin) {
-          (postChannel as TextChannel).send(
-            `${newState.member?.displayName}さんが${newState.channel?.name}に参加しました。`
-          );
-        } else {
-          (postChannel as TextChannel).send(
-            `${oldState.member?.displayName}さんが${oldState.channel?.name}を退出しました。`
-          );
-        }
-      }
+      (postChannel as TextChannel).send(msg);
     }
 
     if (newState.member?.user.bot) return;
     if (!isCheckChannel && !isChannelDiff) return;
+    if (!postChannel?.isText) return;
 
     if (isJoin) {
-      // do something
-      sendText();
+      msg = `${newState.member?.displayName}さんが${newState.channel?.name}に参加しました。`;
     } else if (isLeave) {
-      // do something
-      sendText();
+      msg = `${oldState.member?.displayName}さんが${oldState.channel?.name}を退出しました。`;
     }
+    if (msg === "") throw new Error("Unexpected Error: _voiceStateUpdate()");
+
+    sendText(msg);
   }
 
   /**
