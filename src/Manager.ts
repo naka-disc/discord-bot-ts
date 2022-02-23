@@ -6,26 +6,31 @@ import {
   TextChannel,
   VoiceState,
 } from "discord.js";
-import { Envs } from "./index";
+// TODO: ここのインポートが気持ち悪いので修正予定
+import Config, { Envs } from "./Config";
 
 /**
  * Discord Clientを管理するクラス
  * このクラスを生成して、runすればBotが起動
  */
 export default class Manager {
+
+  /**
+   * 環境変数
+   */
   private envs: Envs;
 
+  /**
+   * DIscord Bot Client
+   */
   private client: Client;
 
   /**
    * コンストラクタ
    * @param token Botトークン
    */
-  constructor(envs: Envs) {
-    // Botトークン ここで管理
-    this.envs = envs;
-
-    // Botクライアント生成 ここで管理
+  constructor() {
+    this.envs = Config.getInstance().getEnvs();
     this.client = new Client({
       intents: [
         Intents.FLAGS.GUILDS,
