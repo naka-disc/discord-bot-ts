@@ -1,13 +1,12 @@
 import {
   Client,
   Intents,
-  Message,
-  MessageEmbed,
   TextChannel,
   VoiceState,
 } from "discord.js";
 // TODO: ここのインポートが気持ち悪いので修正予定
 import Config, { Envs } from "./Config";
+import MessageManager from "./MessageManager";
 
 /**
  * Discord Clientを管理するクラス
@@ -15,15 +14,14 @@ import Config, { Envs } from "./Config";
  */
 export default class Manager {
 
-  /**
-   * 環境変数
-   */
+  /** 環境変数 */
   private envs: Envs;
 
-  /**
-   * DIscord Bot Client
-   */
+  /** DIscord Bot Client */
   private client: Client;
+
+  /** メッセージ受信時用のマネージャ */
+  private messageManager: MessageManager;
 
   /**
    * コンストラクタ
@@ -39,59 +37,26 @@ export default class Manager {
         Intents.FLAGS.GUILD_VOICE_STATES,
       ],
     });
+
+    // 各イベントに対応するマネージャを生成
+    this.messageManager = new MessageManager();
   }
 
   /**
-   * メッセージ送信
-   * @param msg 受信メッセージ
-   * @returns
+   * マネージャ実行
+   * Botの起動用処理
    */
-  private async _sendMessage(msg: Message): Promise<void> {
-    // 送信者がBotの場合は反応しない
-    if (msg.author.bot) {
-      return;
-    }
+  run() {
+    //  トークンを使ってログインすることで起動
+    this.client.login(this.envs.BOT_TOKEN);
+    // 起動時処理
+    this.client.on("ready", () => {
+      console.log(`${this.client.user?.tag} でログインしています。`);
+    });
 
-    // 入力値に応じて分岐
-    if (msg.content === "!embed") {
-      const ret = this.createEmbed();
-      msg.channel.send({ embeds: [ret] });
-    } else {
-      // msg.channel.send('Other');
-    }
-  }
-
-  /**
-   * Embed生成
-   * @returns MessageEmbed
-   */
-  createEmbed(): MessageEmbed {
-    // TODO: Sample実装
-    const exampleEmbed = new MessageEmbed()
-      .setColor("#0099ff")
-      .setTitle("Some title")
-      .setURL("https://discord.js.org/")
-      .setAuthor({
-        name: "Some name",
-        iconURL: "https://i.imgur.com/AfFp7pu.png",
-        url: "https://discord.js.org",
-      })
-      .setDescription("Some description here")
-      .setThumbnail("https://i.imgur.com/AfFp7pu.png")
-      .addFields(
-        { name: "Regular field title", value: "Some value here" },
-        { name: "\u200B", value: "\u200B" },
-        { name: "Inline field title", value: "Some value here", inline: true },
-        { name: "Inline field title", value: "Some value here", inline: true }
-      )
-      .addField("Inline field title", "Some value here", true)
-      .setImage("https://i.imgur.com/AfFp7pu.png")
-      .setTimestamp()
-      .setFooter({
-        text: "Some footer text here",
-        iconURL: "https://i.imgur.com/AfFp7pu.png",
-      });
-    return exampleEmbed;
+    // 各イベントに対応する処理をバインド
+    this.client.on("voiceStateUpdate", this._voiceStateUpdate.bind(this));
+    this.client.on("messageCreate", this.messageManager.run.bind(this.messageManager));
   }
 
   /**
@@ -126,18 +91,5 @@ export default class Manager {
     if (msg === "") throw new Error("Unexpected Error: _voiceStateUpdate()");
 
     sendText(msg);
-  }
-
-  /**
-   * マネージャ実行
-   * Botの起動用処理
-   */
-  run() {
-    this.client.login(this.envs.BOT_TOKEN);
-    this.client.on("ready", () => {
-      console.log(`${this.client.user?.tag} でログインしています。`);
-    });
-    this.client.on("voiceStateUpdate", this._voiceStateUpdate.bind(this));
-    this.client.on("messageCreate", this._sendMessage.bind(this));
   }
 }
