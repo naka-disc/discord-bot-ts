@@ -13,7 +13,6 @@ export default class MessageManager {
    */
   async run(msg: Message): Promise<void> {
     // メッセージの内容でディスパッチしてEmbedを生成
-    console.log(msg)
     let embed;
     switch (msg.content) {
       case "!test":
