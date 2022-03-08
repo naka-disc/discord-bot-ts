@@ -1,5 +1,5 @@
-# discord-bot-ts
-DiscordのBotをTypeScriptで作成するリポジトリ。
+# discord-bot-typescript
+- DiscordのBotをTypeScriptで作成するリポジトリ。
 
 
 # 準備
